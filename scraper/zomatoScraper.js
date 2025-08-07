@@ -28,14 +28,22 @@ async function scrapeByLocation(city, area = '', limit = parseInt(process.env.AR
   const t0 = Date.now();
 
   const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
-  // const browser = await playwright.firefox.launch({ headless: true });
-  const browser = await playwright.chromium.launch({ headless: true });
+
+  const browser = await playwright.chromium.launch({
+    headless: false,
+    args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'],
+  });
 
   const context = await browser.newContext({
     userAgent,
     viewport: { width: 1280, height: 800 },
-    locale: 'en-US'
+    locale: 'en-US',
   });
+
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  });
+
   const page = await context.newPage();
 
   for (const cat of categoryIds) {
@@ -44,7 +52,7 @@ async function scrapeByLocation(city, area = '', limit = parseInt(process.env.AR
     console.log(`\n[INFO] Navigating to (${cat || 'default'}): ${pageURL}`);
 
     try {
-      await page.goto(pageURL, { timeout: 60000 });
+      await page.goto(pageURL, { timeout: 60000, waitUntil: 'load' });
       await randomDelay(2000, 4000);
 
       if (cat === 1) {
