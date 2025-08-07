@@ -28,7 +28,9 @@ async function scrapeByLocation(city, area = '', limit = parseInt(process.env.AR
   const t0 = Date.now();
 
   const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
-  const browser = await playwright.firefox.launch({ headless: true });
+  // const browser = await playwright.firefox.launch({ headless: true });
+  const browser = await playwright.chromium.launch({ headless: true });
+
   const context = await browser.newContext({
     userAgent,
     viewport: { width: 1280, height: 800 },
